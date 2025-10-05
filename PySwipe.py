@@ -7,7 +7,7 @@ pygame.init()
 
 # --- Constants ---
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 800
 FONT_SIZE_GAUGE = 24
 FONT_SIZE_CARD = 30
 FONT_SIZE_GAMEOVER = 72
@@ -24,7 +24,7 @@ COLOR_DARK_GREY = (50, 50, 50)
 COLOR_INSTRUCTION = (150, 150, 150)
 COLOR_ENERGY = (80, 220, 80)      # Brighter Green
 COLOR_MONEY = (255, 220, 80)      # Brighter Gold
-COLOR_TIME = (100, 180, 255)    # Lighter Blue
+COLOR_SANITY = (200, 120, 255)   # Light Purple for Sanity
 COLOR_PREVIEW_NEG = (200, 50, 50) # Red for negative preview
 
 # Game Parameters
@@ -32,310 +32,171 @@ GAUGE_MIN = 0
 GAUGE_MAX = 100
 GAUGE_INITIAL = 50
 
-# --- Card Deck ---
-# Each card has a text description, effects, and an image.
+# --- Card Deck (Modern Life Theme) ---
+# Cards are rebalanced for longer gameplay with smaller increments.
 CARDS = [
-    # Existing Cards
+    # --- Work Themed Cards ---
     {
-        "text": "A dragon is attacking a nearby village! Intervene?",
-        "right_effects": {"energy": -30, "money": 50, "time": -25},
-        "left_effects": {"energy": -5, "money": -10, "time": -5},
-        "image": "images/dragon.png"
+        "text": "Your boss asks you to work over the weekend for a 'critical' deadline.",
+        "right_effects": {"energy": -20, "money": 25, "sanity": -15},
+        "left_effects": {"energy": 5, "money": 0, "sanity": 5},
+        "image": "images/work_weekend.png"
     },
     {
-        "text": "A shady merchant offers a 'shortcut' through the haunted forest.",
-        "right_effects": {"energy": -10, "money": -15, "time": 25},
-        "left_effects": {"energy": 0, "money": 0, "time": -15},
-        "image": "images/merchant.png"
+        "text": "A recruiter reaches out on LinkedIn with a 'once in a lifetime' opportunity.",
+        "right_effects": {"energy": -10, "money": 0, "sanity": -10},
+        "left_effects": {"energy": 0, "money": 0, "sanity": 0},
+        "image": "images/recruiter.png"
     },
     {
-        "text": "The King requests an audience. He seems bored. Entertain him?",
-        "right_effects": {"energy": -15, "money": 20, "time": -20},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/king.png"
+        "text": "It's 2 PM. Do you power through the slump or take a 20-minute coffee break?",
+        "right_effects": {"energy": 10, "money": -5, "sanity": 5},
+        "left_effects": {"energy": -10, "money": 0, "sanity": -5},
+        "image": "images/coffee.png"
     },
     {
-        "text": "You find a mysterious, glowing mushroom. Eat it?",
-        "right_effects": {"energy": 40, "money": -5, "time": -5},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/mushroom.png"
+        "text": "Team lunch at that expensive place everyone loves. Do you join?",
+        "right_effects": {"energy": 5, "money": -20, "sanity": 10},
+        "left_effects": {"energy": 0, "money": 0, "sanity": -5},
+        "image": "images/team_lunch.png"
     },
     {
-        "text": "A traveling circus is in town. Spend the day watching shows?",
-        "right_effects": {"energy": 20, "money": -20, "time": -25},
-        "left_effects": {"energy": 5, "money": 0, "time": -5},
-        "image": "images/circus.png"
+        "text": "You're asked to take on a 'stretch project' that's well outside your job description.",
+        "right_effects": {"energy": -15, "money": 0, "sanity": -20},
+        "left_effects": {"energy": 0, "money": 0, "sanity": 5},
+        "image": "images/stretch_project.png"
     },
     {
-        "text": "Your rival challenges you to a duel at dawn.",
-        "right_effects": {"energy": -25, "money": 25, "time": -10},
-        "left_effects": {"energy": -10, "money": -10, "time": -5},
-        "image": "images/duel.png"
+        "text": "An email from your boss arrives at 9 PM. Do you open it?",
+        "right_effects": {"energy": -5, "money": 0, "sanity": -15},
+        "left_effects": {"energy": 0, "money": 0, "sanity": 10},
+        "image": "images/late_email.png"
+    },
+    # --- Finance Themed Cards ---
+    {
+        "text": "Your favorite streaming service just hiked its price again. Keep subscription?",
+        "right_effects": {"energy": 0, "money": -10, "sanity": 5},
+        "left_effects": {"energy": 0, "money": 0, "sanity": -5},
+        "image": "images/streaming.png"
     },
     {
-        "text": "A powerful wizard offers to enchant your gear for a hefty price.",
-        "right_effects": {"energy": 10, "money": -40, "time": -15},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/wizard.png"
+        "text": "Groceries cost a fortune. Splurge on organic produce or buy instant noodles?",
+        "right_effects": {"energy": 10, "money": -15, "sanity": 5},
+        "left_effects": {"energy": -10, "money": 5, "sanity": -5},
+        "image": "images/groceries.png"
     },
     {
-        "text": "Spend all night at the tavern gambling and drinking?",
-        "right_effects": {"energy": -20, "money": 35, "time": -20},
-        "left_effects": {"energy": 10, "money": 0, "time": -5},
-        "image": "images/tavern.png"
-    },
-    # New Cards
-    {
-        "text": "Invest in a new trading route to the East.",
-        "right_effects": {"energy": -10, "money": 50, "time": -30},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/trade_route.png"
+        "text": "Your friend is hyping up a new cryptocurrency. Invest your savings?",
+        "right_effects": {"energy": -5, "money": 0, "sanity": -20}, # Represents risk, not actual loss/gain
+        "left_effects": {"energy": 0, "money": 0, "sanity": 0},
+        "image": "images/crypto.png"
     },
     {
-        "text": "A famine strikes the northern provinces. Send aid?",
-        "right_effects": {"energy": -10, "money": -30, "time": -15},
-        "left_effects": {"energy": 0, "money": 0, "time": 0},
-        "image": "images/famine.png"
+        "text": "The 'Check Engine' light on your car just came on. Deal with it now?",
+        "right_effects": {"energy": -5, "money": -25, "sanity": 10},
+        "left_effects": {"energy": 0, "money": 0, "sanity": -10},
+        "image": "images/car_trouble.png"
     },
     {
-        "text": "The royal alchemist needs a rare herb from the mountains.",
-        "right_effects": {"energy": -20, "money": 25, "time": -20},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/alchemist.png"
+        "text": "You get an unexpected small bonus. Put it into savings?",
+        "right_effects": {"energy": 0, "money": 20, "sanity": 15},
+        "left_effects": {"energy": 10, "money": 0, "sanity": -5},
+        "image": "images/bonus.png"
     },
     {
-        "text": "A group of bards wants to write a song about your adventures.",
-        "right_effects": {"energy": 5, "money": 10, "time": -15},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/bards.png"
+        "text": "Student loan payments are due. Pay the minimum or an extra chunk?",
+        "right_effects": {"energy": 0, "money": -25, "sanity": 10},
+        "left_effects": {"energy": 0, "money": -15, "sanity": -5},
+        "image": "images/student_loan.png"
+    },
+     # --- Health & Wellness Cards ---
+    {
+        "text": "It's dark and cold, but you know you should go to the gym. Go?",
+        "right_effects": {"energy": 20, "money": -5, "sanity": 10},
+        "left_effects": {"energy": -10, "money": 0, "sanity": -5},
+        "image": "images/gym.png"
     },
     {
-        "text": "You discover an ancient library hidden beneath the city.",
-        "right_effects": {"energy": -5, "money": 0, "time": 30},
-        "left_effects": {"energy": 0, "money": 0, "time": -10},
-        "image": "images/library.png"
+        "text": "You have a lingering cough. Take a sick day to rest?",
+        "right_effects": {"energy": 25, "money": -15, "sanity": 10},
+        "left_effects": {"energy": -15, "money": 0, "sanity": -10},
+        "image": "images/sick_day.png"
     },
     {
-        "text": "A plague is spreading in the slums. Quarantine the area?",
-        "right_effects": {"energy": -15, "money": -20, "time": -25},
-        "left_effects": {"energy": 0, "money": -10, "time": -10},
-        "image": "images/plague.png"
+        "text": "It's been a long day. Order greasy takeout for dinner?",
+        "right_effects": {"energy": 10, "money": -15, "sanity": 5},
+        "left_effects": {"energy": -5, "money": 0, "sanity": -10},
+        "image": "images/takeout.png"
     },
     {
-        "text": "A foreign diplomat arrives with a proposal of alliance.",
-        "right_effects": {"energy": -5, "money": 20, "time": -20},
-        "left_effects": {"energy": 0, "money": -15, "time": -5},
-        "image": "images/diplomat.png"
+        "text": "Your phone says you've been doomscrolling for an hour. Put it down?",
+        "right_effects": {"energy": 5, "money": 0, "sanity": 15},
+        "left_effects": {"energy": -10, "money": 0, "sanity": -15},
+        "image": "images/doomscroll.png"
     },
     {
-        "text": "A group of miners has gone on strike. Negotiate with them?",
-        "right_effects": {"energy": -10, "money": -10, "time": -15},
-        "left_effects": {"energy": 0, "money": -25, "time": -10},
-        "image": "images/miners.png"
+        "text": "Your annual physical is overdue. Schedule an appointment?",
+        "right_effects": {"energy": 0, "money": -20, "sanity": 10},
+        "left_effects": {"energy": -5, "money": 0, "sanity": -10},
+        "image": "images/doctor.png"
     },
     {
-        "text": "A new philosophy is gaining popularity. Suppress it?",
-        "right_effects": {"energy": -5, "money": -10, "time": -15},
-        "left_effects": {"energy": 0, "money": 5, "time": -5},
-        "image": "images/philosophy.png"
+        "text": "Feeling completely burnt out. Meditate for 10 minutes?",
+        "right_effects": {"energy": 5, "money": 0, "sanity": 20},
+        "left_effects": {"energy": -5, "money": 0, "sanity": -5},
+        "image": "images/meditate.png"
+    },
+    # --- Social & Lifestyle Cards ---
+    {
+        "text": "Friends want to go out for expensive cocktails. Do you go?",
+        "right_effects": {"energy": -10, "money": -20, "sanity": 15},
+        "left_effects": {"energy": 5, "money": 0, "sanity": -10},
+        "image": "images/cocktails.png"
     },
     {
-        "text": "A master thief offers to teach you their skills.",
-        "right_effects": {"energy": -15, "money": 25, "time": -20},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/thief.png"
+        "text": "Your parents call for the third time this week. Pick up?",
+        "right_effects": {"energy": -10, "money": 0, "sanity": -5},
+        "left_effects": {"energy": 0, "money": 0, "sanity": 5},
+        "image": "images/phone_call.png"
     },
     {
-        "text": "You have a chance to sabotage your rival's business.",
-        "right_effects": {"energy": -10, "money": 30, "time": -15},
-        "left_effects": {"energy": 0, "money": -10, "time": -5},
-        "image": "images/sabotage.png"
+        "text": "It's your friend's destination wedding. Can you really afford to go?",
+        "right_effects": {"energy": -15, "money": -30, "sanity": 10},
+        "left_effects": {"energy": 0, "money": 0, "sanity": -15},
+        "image": "images/wedding.png"
     },
     {
-        "text": "A powerful artifact is discovered. Claim it for the kingdom?",
-        "right_effects": {"energy": -20, "money": 40, "time": -25},
-        "left_effects": {"energy": 0, "money": -10, "time": -5},
-        "image": "images/artifact.png"
+        "text": "That pile of laundry isn't going to do itself. Tackle it now?",
+        "right_effects": {"energy": -10, "money": 0, "sanity": 15},
+        "left_effects": {"energy": 0, "money": 0, "sanity": -10},
+        "image": "images/laundry.png"
     },
     {
-        "text": "The city guard is demanding higher wages.",
-        "right_effects": {"energy": -5, "money": -25, "time": -10},
-        "left_effects": {"energy": 0, "money": -15, "time": -10},
-        "image": "images/guard.png"
+        "text": "A new season of that show everyone's talking about just dropped. Binge it all?",
+        "right_effects": {"energy": -15, "money": 0, "sanity": 10},
+        "left_effects": {"energy": 5, "money": 0, "sanity": 0},
+        "image": "images/binge_watch.png"
     },
     {
-        "text": "A traveling artist offers to paint your portrait.",
-        "right_effects": {"energy": 5, "money": -10, "time": -15},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/artist.png"
+        "text": "Your pet looks bored. Spend 30 minutes playing with them?",
+        "right_effects": {"energy": -5, "money": 0, "sanity": 20},
+        "left_effects": {"energy": 0, "money": 0, "sanity": -5},
+        "image": "images/pet.png"
     },
     {
-        "text": "A noble is plotting against the King. Expose them?",
-        "right_effects": {"energy": -10, "money": 30, "time": -20},
-        "left_effects": {"energy": 0, "money": -15, "time": -5},
-        "image": "images/plot.png"
-    },
-    {
-        "text": "A new technology is invented. Fund its development?",
-        "right_effects": {"energy": -10, "money": -30, "time": 25},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/technology.png"
-    },
-    {
-        "text": "A group of peasants is protesting high taxes.",
-        "right_effects": {"energy": -10, "money": -15, "time": -15},
-        "left_effects": {"energy": 0, "money": -20, "time": -10},
-        "image": "images/protest.png"
-    },
-    {
-        "text": "A mysterious stranger gives you a locked box.",
-        "right_effects": {"energy": -5, "money": 15, "time": -10},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/box.png"
-    },
-    {
-        "text": "A famous explorer asks for funding for an expedition.",
-        "right_effects": {"energy": -10, "money": -25, "time": 30},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/explorer.png"
-    },
-    {
-        "text": "A ghost is haunting the royal palace. Investigate?",
-        "right_effects": {"energy": -15, "money": 10, "time": -20},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/ghost.png"
-    },
-    {
-        "text": "A rare comet is passing. Host a festival to celebrate?",
-        "right_effects": {"energy": 15, "money": -20, "time": -20},
-        "left_effects": {"energy": 5, "money": 0, "time": -5},
-        "image": "images/comet.png"
-    },
-    {
-        "text": "A magical spring is discovered. Commercialize it?",
-        "right_effects": {"energy": 10, "money": 30, "time": -15},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/spring.png"
-    },
-    {
-        "text": "A group of scholars wants to establish a university.",
-        "right_effects": {"energy": -5, "money": -20, "time": 25},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/university.png"
-    },
-    {
-        "text": "A secret society invites you to join their ranks.",
-        "right_effects": {"energy": -10, "money": 20, "time": -20},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/society.png"
-    },
-    {
-        "text": "A prophecy foretells your doom. Consult an oracle?",
-        "right_effects": {"energy": -5, "money": -10, "time": -15},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/prophecy.png"
-    },
-    {
-        "text": "Your childhood friend is in trouble. Help them?",
-        "right_effects": {"energy": -15, "money": -10, "time": -20},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/friend.png"
-    },
-    {
-        "text": "A valuable shipwreck is discovered off the coast.",
-        "right_effects": {"energy": -20, "money": 40, "time": -25},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/shipwreck.png"
-    },
-    {
-        "text": "A tribe of nomads offers to trade rare goods.",
-        "right_effects": {"energy": -5, "money": 20, "time": -15},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/nomads.png"
-    },
-    {
-        "text": "A beast is terrorizing the countryside. Hunt it down?",
-        "right_effects": {"energy": -25, "money": 30, "time": -20},
-        "left_effects": {"energy": 0, "money": -10, "time": -5},
-        "image": "images/beast.png"
-    },
-    {
-        "text": "A great storm is approaching. Prepare the city?",
-        "right_effects": {"energy": -15, "money": -20, "time": -20},
-        "left_effects": {"energy": 0, "money": -10, "time": -10},
-        "image": "images/storm.png"
-    },
-    {
-        "text": "A charismatic leader is rallying the common folk.",
-        "right_effects": {"energy": -10, "money": -10, "time": -15},
-        "left_effects": {"energy": 0, "money": 5, "time": -5},
-        "image": "images/leader.png"
-    },
-    {
-        "text": "A cursed treasure is unearthed. Destroy it?",
-        "right_effects": {"energy": -10, "money": 10, "time": -15},
-        "left_effects": {"energy": 0, "money": -5, "time": -5},
-        "image": "images/treasure.png"
-    },
-    {
-        "text": "The kingdom's spies have been compromised.",
-        "right_effects": {"energy": -15, "money": -20, "time": -25},
-        "left_effects": {"energy": 0, "money": -10, "time": -10},
-        "image": "images/spies.png"
-    },
-    {
-        "text": "A rare celestial event is happening. Study it?",
-        "right_effects": {"energy": -5, "money": -5, "time": 20},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/celestial.png"
-    },
-    {
-        "text": "A gladiator tournament is being held. Participate?",
-        "right_effects": {"energy": -20, "money": 30, "time": -20},
-        "left_effects": {"energy": 5, "money": -5, "time": -5},
-        "image": "images/gladiator.png"
-    },
-    {
-        "text": "A new continent has been discovered. Launch an expedition?",
-        "right_effects": {"energy": -25, "money": -40, "time": 40},
-        "left_effects": {"energy": 0, "money": -10, "time": -5},
-        "image": "images/continent.png"
-    },
-    {
-        "text": "A hermit living in the woods claims to know the future.",
-        "right_effects": {"energy": -5, "money": -10, "time": -10},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/hermit.png"
-    },
-    {
-        "text": "The royal treasury is running low. Raise taxes?",
-        "right_effects": {"energy": -10, "money": 30, "time": -15},
-        "left_effects": {"energy": 0, "money": -20, "time": -10},
-        "image": "images/taxes.png"
-    },
-    {
-        "text": "A legendary blacksmith can forge a powerful weapon for you.",
-        "right_effects": {"energy": -10, "money": -35, "time": -20},
-        "left_effects": {"energy": 0, "money": 0, "time": -5},
-        "image": "images/blacksmith.png"
-    },
-    {
-        "text": "A trade guild is trying to monopolize the market.",
-        "right_effects": {"energy": -10, "money": -20, "time": -15},
-        "left_effects": {"energy": 0, "money": 25, "time": -10},
-        "image": "images/guild.png"
-    },
-    {
-        "text": "A rebellion is brewing in a distant province.",
-        "right_effects": {"energy": -25, "money": -30, "time": -30},
-        "left_effects": {"energy": 0, "money": -15, "time": -10},
-        "image": "images/rebellion.png"
+        "text": "It's a beautiful day. Spend your lunch break outside?",
+        "right_effects": {"energy": 15, "money": 0, "sanity": 10},
+        "left_effects": {"energy": -5, "money": 0, "sanity": -5},
+        "image": "images/outside.png"
     }
 ]
 
+# Create a larger deck by duplicating the base cards to ensure enough for a 5-minute game
+FULL_DECK = CARDS * 2
+
 # --- Setup Screen and Fonts ---
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Swipe Quest")
+pygame.display.set_caption("Modern Life Survival")
 clock = pygame.time.Clock()
 
 font_gauge = pygame.font.Font(None, FONT_SIZE_GAUGE)
@@ -345,7 +206,7 @@ font_gameover = pygame.font.Font(None, FONT_SIZE_GAMEOVER)
 # --- Game State Variables ---
 energy = GAUGE_INITIAL
 money = GAUGE_INITIAL
-time = GAUGE_INITIAL
+sanity = GAUGE_INITIAL
 score = 0
 highscore = 0
 game_over = False
@@ -360,7 +221,7 @@ card_images = {} # Cache for loaded card images
 
 
 # --- Card Management ---
-deck = list(CARDS)
+deck = list(FULL_DECK)
 random.shuffle(deck)
 current_card = None # Will be set by get_next_card
 
@@ -434,11 +295,11 @@ def draw_gauges(preview_effects=None):
 
     draw_single_gauge("Energy", energy, COLOR_ENERGY, 50, 20, "energy")
     draw_single_gauge("Money", money, COLOR_MONEY, 300, 20, "money")
-    draw_single_gauge("Time", time, COLOR_TIME, 550, 20, "time")
+    draw_single_gauge("Sanity", sanity, COLOR_SANITY, 550, 20, "sanity")
 
     # Score and Highscore
-    draw_text(f"Score: {score}", font_gauge, COLOR_WHITE, screen, SCREEN_WIDTH / 2, 80, center=True)
-    draw_text(f"High Score: {highscore}", font_gauge, COLOR_WHITE, screen, SCREEN_WIDTH / 2, 110, center=True)
+    draw_text(f"Days Survived: {score}", font_gauge, COLOR_WHITE, screen, SCREEN_WIDTH / 2, 80, center=True)
+    draw_text(f"Best Streak: {highscore}", font_gauge, COLOR_WHITE, screen, SCREEN_WIDTH / 2, 110, center=True)
 
 
 def draw_card():
@@ -480,22 +341,22 @@ def draw_card():
         draw_text(line.strip(), font_card, COLOR_BLACK, screen, card_rect.centerx, text_y_start + i * 35, center=True)
 
     # Draw instructions
-    draw_text("◀ Deny", font_card, COLOR_INSTRUCTION, screen, card_rect.left, card_rect.bottom + 20)
-    draw_text("Agree ▶", font_card, COLOR_INSTRUCTION, screen, card_rect.right - font_card.size("Agree ▶")[0], card_rect.bottom + 20)
+    draw_text("◀ No", font_card, COLOR_INSTRUCTION, screen, card_rect.left, card_rect.bottom + 20)
+    draw_text("Yes ▶", font_card, COLOR_INSTRUCTION, screen, card_rect.right - font_card.size("Yes ▶")[0], card_rect.bottom + 20)
 
 
 def apply_effects(effects):
     """Applies the effects of a choice to the gauges and clamps values."""
-    global energy, money, time, score
+    global energy, money, sanity, score
 
     energy += effects.get("energy", 0)
     money += effects.get("money", 0)
-    time += effects.get("time", 0)
+    sanity += effects.get("sanity", 0)
 
     # Clamp values between MIN and MAX
     energy = max(GAUGE_MIN, min(GAUGE_MAX, energy))
     money = max(GAUGE_MIN, min(GAUGE_MAX, money))
-    time = max(GAUGE_MIN, min(GAUGE_MAX, time))
+    sanity = max(GAUGE_MIN, min(GAUGE_MAX, sanity))
 
     score += 1
 
@@ -506,22 +367,22 @@ def check_game_over():
     is_over = False
     if energy <= GAUGE_MIN:
         is_over = True
-        game_over_message = "You ran out of energy!"
+        game_over_message = "You collapsed from exhaustion."
     elif energy >= GAUGE_MAX:
         is_over = True
-        game_over_message = "You became supercharged and exploded!"
+        game_over_message = "You had so much energy you couldn't sleep for a week."
     elif money <= GAUGE_MIN:
         is_over = True
-        game_over_message = "You went bankrupt!"
+        game_over_message = "Your bank account is empty."
     elif money >= GAUGE_MAX:
         is_over = True
-        game_over_message = "Your greed consumed you!"
-    elif time <= GAUGE_MIN:
+        game_over_message = "You became a victim of your own lifestyle inflation."
+    elif sanity <= GAUGE_MIN:
         is_over = True
-        game_over_message = "You ran out of time!"
-    elif time >= GAUGE_MAX:
+        game_over_message = "You're completely burnt out."
+    elif sanity >= GAUGE_MAX:
         is_over = True
-        game_over_message = "You got lost in the flow of time!"
+        game_over_message = "You achieved ultimate zen and left society."
 
     if is_over:
         game_over = True
@@ -533,7 +394,7 @@ def get_next_card():
     """Gets the next card from the deck, reshuffling if necessary, and resets its animation state."""
     global current_card, deck, card_pos_x, card_target_x
     if not deck:
-        deck = list(CARDS)
+        deck = list(FULL_DECK)
         random.shuffle(deck)
 
     current_card = deck.pop()
@@ -582,7 +443,13 @@ while running:
                     swiping = 'right'
                     card_target_x = SCREEN_WIDTH + CARD_WIDTH / 2
             elif game_over:
-                running = False
+                # Restart game on key press
+                energy = GAUGE_INITIAL
+                money = GAUGE_INITIAL
+                sanity = GAUGE_INITIAL
+                score = 0
+                game_over = False
+                get_next_card()
 
 
     # --- Drawing ---
@@ -595,9 +462,9 @@ while running:
         # Game Over Screen
         draw_text("GAME OVER", font_gameover, COLOR_WHITE, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, center=True)
         draw_text(game_over_message, font_card, COLOR_WHITE, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, center=True)
-        draw_text(f"Final Score: {score}", font_card, COLOR_GREY, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, center=True)
-        draw_text(f"High Score: {highscore}", font_card, COLOR_GREY, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 80, center=True)
-        draw_text("Press any key to exit.", font_gauge, COLOR_GREY, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 120, center=True)
+        draw_text(f"You Survived: {score} Days", font_card, COLOR_GREY, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, center=True)
+        draw_text(f"Best Streak: {highscore} Days", font_card, COLOR_GREY, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 80, center=True)
+        draw_text("Press any key to try again.", font_gauge, COLOR_GREY, screen, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 120, center=True)
 
 
     # --- Update Display ---
